@@ -7,8 +7,6 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "build": "npx knex migrate:latest --env production && npx knex seed:run --env production",
-    "postinstall": "npm run migrate",
-    "migrate": "npx knex migrate:latest",
     "seed": "npx knex seed:run"
   },
   "keywords": [],
