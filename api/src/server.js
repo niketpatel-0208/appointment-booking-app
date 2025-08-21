@@ -1,46 +1,47 @@
-// api/src/server.js
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+    // api/src/server.js
+    require('dotenv').config();
+    const express = require('express');
+    const cors = require('cors');
 
-const authRoutes = require('./routes/auth');
-const bookingRoutes = require('./routes/bookings');
+    const authRoutes = require('./routes/auth');
+    const bookingRoutes = require('./routes/bookings');
 
-const app = express();
-const PORT = process.env.PORT || 5001;
+    // --- CORS Configuration ---
+    const allowedOrigins = [
+      'http://localhost:5173', // For local testing
+      // Your live Vercel frontend URL
+      'https://appointment-booking-mvsv29ulq-nikets-projects-c29a5255.vercel.app' 
+    ];
 
-// Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.CORS_ORIGIN || 'https://your-frontend-domain.vercel.app'
-    : true,
-  credentials: true
-}));
-app.use(express.json());
+    const corsOptions = {
+      origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+          callback(null, true);
+        } else {
+          callback(new Error('This origin is not allowed by CORS'));
+        }
+      },
+    };
+    // --- End of CORS Configuration ---
 
-// API Routes
-app.use('/api', authRoutes);
-app.use('/api', bookingRoutes);
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'API is running!',
-    time: new Date().toISOString(),
-    env: process.env.NODE_ENV,
-    port: PORT,
-    hasJwtSecret: !!process.env.JWT_SECRET,
-    corsOrigin: process.env.CORS_ORIGIN || 'not-set'
-  });
-});
+    const app = express();
+    const PORT = process.env.PORT || 5001;
 
-// Root route for testing
-app.get('/', (req, res) => {
-  res.json({ message: 'Appointment Booking API', status: 'healthy' });
-});
+    // Middleware
+    app.use(cors(corsOptions));
+    app.use(express.json());
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server listening on http://localhost:${PORT}`);
-});
+    // API Routes
+    app.use('/api', authRoutes);
+    app.use('/api', bookingRoutes);
 
-module.exports = app;
+    // Health check route
+    app.get('/api/health', (req, res) => {
+      res.json({ status: 'API is running!', time: new Date().toISOString() });
+    });
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server listening on http://localhost:${PORT}`);
+    });
+    
