@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, LogOut, CheckCircle, Plus, ChevronRight, ChevronDown } from 'lucide-react';
+import { Calendar, Clock, User, LogOut, CheckCircle, Plus, ChevronRight, ChevronDown, MapPin, Stethoscope, Hash, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
 import Logo from '../components/Logo';
@@ -11,7 +11,7 @@ const Container = styled(motion.div)`
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
-  
+
   @media (max-width: 768px) {
     padding: 0.5rem;
   }
@@ -157,8 +157,8 @@ const CardTitle = styled.h2`
 const BookingsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-height: 400px;
+  gap: 1.25rem;
+  max-height: 450px;
   overflow-y: auto;
   padding-right: 0.5rem;
   
@@ -180,13 +180,126 @@ const BookingsList = styled.div`
 const BookingItem = styled(motion.div)`
   background: ${props => props.bgColor || 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'};
   border: 1px solid ${props => props.borderColor || '#93c5fd'};
-  padding: 1rem;
-  border-radius: 12px;
+  padding: 1.25rem;
+  border-radius: 16px;
   color: ${props => props.textColor || '#1e40af'};
-  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: ${props => props.accentColor || '#3b82f6'};
+    border-radius: 0 0 0 16px;
+  }
+`;
+
+const BookingHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const BookingMainInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+`;
+
+const BookingContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const AppointmentDate = styled.div`
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: ${props => props.color || '#1e40af'};
+  line-height: 1.2;
+`;
+
+const AppointmentTime = styled.div`
+  font-size: 0.9rem;
+  color: ${props => props.color || '#64748b'};
+  font-weight: 500;
+`;
+
+const AppointmentDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+`;
+
+const DetailItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: ${props => props.color || '#64748b'};
+  opacity: 0.8;
+`;
+
+const BookingStatus = styled.span`
+  background: ${props => props.bgColor || '#dbeafe'};
+  color: ${props => props.textColor || '#1e40af'};
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const BookingDateTime = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${props => props.color || '#1e40af'};
+`;
+
+const BookingDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+`;
+
+const BookingId = styled.div`
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.8rem;
+  color: ${props => props.color || '#64748b'};
+`;
+
+const AppointmentTypeIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  background: ${props => props.bgColor || 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'};
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  flex-shrink: 0;
 `;
 
 const SlotsList = styled.div`
@@ -378,8 +491,14 @@ const SlotsContainer = styled(motion.div)`
 const EmptyState = styled.div`
   text-align: center;
   color: #64748b;
-  font-style: italic;
-  padding: 2rem 0;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  border: 2px dashed #cbd5e0;
 `;
 
 const LoadingSpinner = styled(motion.div)`
@@ -477,6 +596,63 @@ const PatientDashboard = () => {
     });
   };
 
+  const getAppointmentStatus = (booking) => {
+    const now = new Date();
+    const appointmentDate = new Date(booking.slot_start_time);
+
+    if (appointmentDate < now) {
+      return {
+        label: 'Completed',
+        bgColor: '#d1fae5',
+        textColor: '#065f46',
+        accentColor: '#10b981'
+      };
+    } else if (appointmentDate.toDateString() === now.toDateString()) {
+      return {
+        label: 'Today',
+        bgColor: '#fef3c7',
+        textColor: '#92400e',
+        accentColor: '#f59e0b'
+      };
+    } else {
+      return {
+        label: 'Upcoming',
+        bgColor: '#dbeafe',
+        textColor: '#1e40af',
+        accentColor: '#3b82f6'
+      };
+    }
+  };
+
+  const formatAppointmentDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    let dayLabel;
+    if (date.toDateString() === today.toDateString()) {
+      dayLabel = 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      dayLabel = 'Tomorrow';
+    } else {
+      dayLabel = date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    const time = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+
+    return { dayLabel, time, fullDate: date };
+  };
+
   const getTimeOfDay = (date) => {
     const hour = date.getHours();
     if (hour < 12) return 'Morning';
@@ -491,7 +667,6 @@ const PatientDashboard = () => {
 
     const isToday = date.toDateString() === today.toDateString();
     const isTomorrow = date.toDateString() === tomorrow.toDateString();
-    const isCurrentYear = date.getFullYear() === today.getFullYear();
 
     if (isToday) {
       return {
@@ -500,7 +675,7 @@ const PatientDashboard = () => {
           weekday: 'long',
           month: 'long',
           day: 'numeric',
-          ...(isCurrentYear ? {} : { year: 'numeric' })
+          year: 'numeric'
         })
       };
     } else if (isTomorrow) {
@@ -510,7 +685,7 @@ const PatientDashboard = () => {
           weekday: 'long',
           month: 'long',
           day: 'numeric',
-          ...(isCurrentYear ? {} : { year: 'numeric' })
+          year: 'numeric'
         })
       };
     } else {
@@ -519,7 +694,7 @@ const PatientDashboard = () => {
         info: date.toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',
-          ...(isCurrentYear ? {} : { year: 'numeric' })
+          year: 'numeric'
         })
       };
     }
@@ -607,30 +782,70 @@ const PatientDashboard = () => {
           ) : (
             <BookingsList>
               {myBookings.length > 0 ? (
-                myBookings.map(booking => (
-                  <BookingItem
-                    key={booking.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    bgColor="linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
-                    borderColor="#93c5fd"
-                    textColor="#1e40af"
-                  >
-                    <Clock size={18} />
-                    {new Date(booking.slot_start_time).toLocaleString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </BookingItem>
-                ))
+                myBookings.map((booking, index) => {
+                  const status = getAppointmentStatus(booking);
+                  const { dayLabel, time } = formatAppointmentDateTime(booking.slot_start_time);
+
+                  return (
+                    <BookingItem
+                      key={booking.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      bgColor={status.bgColor}
+                      borderColor={status.accentColor + '40'}
+                      textColor={status.textColor}
+                      accentColor={status.accentColor}
+                    >
+                      <BookingHeader>
+                        <BookingMainInfo>
+                          <AppointmentTypeIcon bgColor={`linear-gradient(135deg, ${status.accentColor} 0%, ${status.accentColor}dd 100%)`}>
+                            <Stethoscope color="white" size={20} />
+                          </AppointmentTypeIcon>
+                          <BookingContent>
+                            <AppointmentDate color={status.accentColor}>
+                              {dayLabel}
+                            </AppointmentDate>
+                            <AppointmentTime color={status.textColor}>
+                              {time}
+                            </AppointmentTime>
+                          </BookingContent>
+                        </BookingMainInfo>
+                        <div style={{ textAlign: 'right' }}>
+                          <BookingStatus
+                            bgColor={status.accentColor + '20'}
+                            textColor={status.accentColor}
+                          >
+                            {status.label}
+                          </BookingStatus>
+                          <BookingId color={status.textColor} style={{ marginTop: '0.25rem', fontSize: '0.75rem' }}>
+                            #{booking.id.toString().padStart(3, '0')}
+                          </BookingId>
+                        </div>
+                      </BookingHeader>
+
+                      <AppointmentDetails>
+                        <DetailItem color={status.textColor}>
+                          <MapPin size={14} color={status.accentColor} />
+                          <span>HealthCare Medical Center</span>
+                        </DetailItem>
+                        <DetailItem color={status.textColor}>
+                          <User size={14} color={status.accentColor} />
+                          <span>General Health Consultation</span>
+                        </DetailItem>
+                      </AppointmentDetails>
+                    </BookingItem>
+                  );
+                })
               ) : (
                 <EmptyState>
-                  No upcoming appointments scheduled
+                  <AlertCircle size={48} color="#94a3b8" style={{ marginBottom: '1rem' }} />
+                  <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#64748b', marginBottom: '0.5rem' }}>
+                    No upcoming appointments scheduled
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+                    Book an appointment from the available slots below
+                  </div>
                 </EmptyState>
               )}
             </BookingsList>
