@@ -24,7 +24,19 @@ app.use('/api', bookingRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'API is running!', time: new Date().toISOString() });
+  res.json({ 
+    status: 'API is running!', 
+    time: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    port: PORT,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    corsOrigin: process.env.CORS_ORIGIN || 'not-set'
+  });
+});
+
+// Root route for testing
+app.get('/', (req, res) => {
+  res.json({ message: 'Appointment Booking API', status: 'healthy' });
 });
 
 app.listen(PORT, () => {
