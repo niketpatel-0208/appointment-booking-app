@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, LogOut, CheckCircle, Plus, ChevronRight, ChevronDown } from 'lucide-react';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 const Container = styled(motion.div)`
   width: 100%;
@@ -546,6 +547,7 @@ const PatientDashboard = () => {
         transition={{ duration: 0.6, delay: 0.1 }}
       >
         <WelcomeSection>
+          <Logo size="50px" fontSize="1.6rem" color="#1a202c" />
           <Avatar>
             <User color="white" size={24} />
           </Avatar>

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, Heart } from 'lucide-react';
 import AuthContext from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 const Container = styled(motion.div)`
   width: 100%;
@@ -192,13 +193,7 @@ const LoginPage = () => {
         transition={{ duration: 0.6, delay: 0.1 }}
       >
         <Header>
-          <LogoIcon
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Heart color="white" size={28} />
-          </LogoIcon>
+          <Logo size="60px" fontSize="1.8rem" />
           <Title>Welcome Back</Title>
           <Subtitle>Sign in to your HealthCare account</Subtitle>
         </Header>

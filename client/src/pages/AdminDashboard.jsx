@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Shield, LogOut, Users, Calendar, Mail, Clock, Hash } from 'lucide-react';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
+import Logo from '../components/Logo';
 
 const Container = styled(motion.div)`
   width: 100%;
@@ -275,6 +276,7 @@ const AdminDashboard = () => {
         transition={{ duration: 0.6, delay: 0.1 }}
       >
         <AdminSection>
+          <Logo size="50px" fontSize="1.6rem" color="#1a202c" />
           <AdminBadge>
             <Shield color="white" size={24} />
           </AdminBadge>
