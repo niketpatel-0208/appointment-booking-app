@@ -11,8 +11,10 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors({
-    // In production, you should restrict this to your frontend's URL
-    // origin: 'https://your-frontend-app.com' 
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.CORS_ORIGIN || 'https://your-frontend-domain.vercel.app'
+    : true,
+  credentials: true
 }));
 app.use(express.json());
 
@@ -28,3 +30,5 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on http://localhost:${PORT}`);
 });
+
+module.exports = app;

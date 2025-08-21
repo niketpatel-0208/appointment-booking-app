@@ -1,0 +1,11 @@
+{
+  "testEnvironment": "node",
+  "testTimeout": 30000,
+  "collectCoverageFrom": [
+    "src/**/*.js"
+  ],
+  "coverageDirectory": "coverage",
+  "testMatch": [
+    "**/tests/**/*.test.js"
+  ]
+}
