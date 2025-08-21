@@ -9,7 +9,7 @@
     // --- CORS Configuration ---
     const allowedOrigins = [
       'http://localhost:5173',
-      'https://appointment-booking-mvsv29ulq-nikets-projects-c29a5255.vercel.app' 
+      'https://appointment-booking-app-nu.vercel.app'
     ];
 
     const corsOptions = {
