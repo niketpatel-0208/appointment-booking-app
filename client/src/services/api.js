@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://appointment-booking-api-dolj.onrender.com', // Your backend API URL
+  baseURL: 'https://appointment-booking-api-dolj.onrender.com/api', 
   headers: {
     'Content-Type': 'application/json',
   },

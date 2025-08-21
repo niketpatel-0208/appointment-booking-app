@@ -8,8 +8,7 @@
 
     // --- CORS Configuration ---
     const allowedOrigins = [
-      'http://localhost:5173', // For local testing
-      // Your live Vercel frontend URL
+      'http://localhost:5173',
       'https://appointment-booking-mvsv29ulq-nikets-projects-c29a5255.vercel.app' 
     ];
 
