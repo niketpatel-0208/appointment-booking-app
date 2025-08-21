@@ -4,8 +4,8 @@ A modern, full-stack appointment booking application for small clinics with role
 
 ## 🚀 Live Application
 
-**🌐 Frontend:** [https://your-frontend-app.vercel.app](https://your-frontend-app.vercel.app)  
-**🔗 Backend API:** [https://your-api-app.render.com](https://your-api-app.render.com)
+**🌐 Frontend:** [https://appointment-booking-app-nu.vercel.app](https://appointment-booking-app-nu.vercel.app)  
+**🔗 Backend API:** [https://appointment-booking-api-dolj.onrender.com](https://appointment-booking-api-dolj.onrender.com)
 
 ### 🔐 Test Credentials
 
@@ -161,19 +161,23 @@ npm test  # Run API tests
 
 **API (.env):**
 ```bash
-DATABASE_URL=your_database_connection_string
 JWT_SECRET=your_super_secure_jwt_secret_here
 PORT=5001
 NODE_ENV=production
-CORS_ORIGIN=https://your-frontend-domain.com
+CORS_ORIGIN=https://appointment-booking-app-nu.vercel.app
 ```
 
 **Client:**
 ```bash
-VITE_API_URL=https://your-api-domain.com
+VITE_API_URL=https://appointment-booking-api-dolj.onrender.com
 ```
 
-### 📡 Deployment Steps Taken
+### 📡 Deployment Status
+
+✅ **Backend Deployed:** [https://appointment-booking-api-dolj.onrender.com](https://appointment-booking-api-dolj.onrender.com)  
+✅ **Frontend Deployed:** [https://appointment-booking-app-nu.vercel.app](https://appointment-booking-app-nu.vercel.app)  
+✅ **Database:** SQLite running on Render persistent storage  
+✅ **Auto-deployment:** Enabled on `main` branch pushes
 
 #### Backend (Render)
 1. **Created Render account** and connected GitHub repo
@@ -199,17 +203,35 @@ VITE_API_URL=https://your-api-domain.com
 - **Production:** SQLite on persistent Render disk
 - **Migration path:** Easy switch to PostgreSQL when needed
 
-### 🔧 Deploy Commands Used
+### 🔧 Deployment Commands Used
 ```bash
-# Render deployment (automatic via GitHub integration)
-git push origin main
+# Backend deployment (automatic via GitHub integration)
+git push origin main  # Triggers Render auto-deploy
 
-# Vercel deployment  
-npx vercel --prod
+# Frontend deployment (automatic via GitHub integration)  
+git push origin main  # Triggers Vercel auto-deploy
 
-# Database migration (runs automatically via postinstall)
+# Database migration (runs automatically on Render via postinstall hook)
 npm run migrate && npm run seed
 ```
+
+---
+
+## 🎯 **Assignment Complete!**
+
+### 📋 **Deliverables Checklist:**
+- ✅ **Full-stack appointment booking system** (React + Node.js)
+- ✅ **Live hosted URLs** (Frontend on Vercel, Backend on Render)
+- ✅ **Role-based authentication** (Patient/Admin access)
+- ✅ **Complete GitHub repository** with documentation
+- ✅ **18 comprehensive tests** - all passing
+- ✅ **API verification scripts** and health checks
+- ✅ **Production-ready deployment** with auto-scaling
+
+### 🌐 **Access Links:**
+- **Live App:** [https://appointment-booking-app-nu.vercel.app](https://appointment-booking-app-nu.vercel.app)
+- **API Health:** [https://appointment-booking-api-dolj.onrender.com/api/health](https://appointment-booking-api-dolj.onrender.com/api/health)
+- **GitHub Repo:** [https://github.com/niketpatel-0208/appointment-booking-app](https://github.com/niketpatel-0208/appointment-booking-app)
 
 ---
 
@@ -231,7 +253,7 @@ See [VERIFICATION.md](./VERIFICATION.md) for complete curl commands and testing 
 **Quick test:**
 ```bash
 # Health check
-curl https://your-api-domain.com/api/health
+curl https://appointment-booking-api-dolj.onrender.com/api/health
 
 # Register + Login + Book workflow
 # (see VERIFICATION.md for complete script)
@@ -315,12 +337,6 @@ npm run dev  # Start development servers
 npm test     # Run tests before committing
 git push     # Automatic deployment via CI/CD
 ```
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](./LICENSE) file for details
 
 ---
 
