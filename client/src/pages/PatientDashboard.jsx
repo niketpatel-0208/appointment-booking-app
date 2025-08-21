@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, LogOut, CheckCircle, Plus } from 'lucide-react';
+import { Calendar, Clock, User, LogOut, CheckCircle, Plus, ChevronRight, ChevronDown } from 'lucide-react';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
 
@@ -191,52 +191,187 @@ const BookingItem = styled(motion.div)`
 const SlotsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  max-height: 400px;
+  gap: 1rem;
+  max-height: 500px;
   overflow-y: auto;
   padding-right: 0.5rem;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+  }
 `;
 
-const SlotItem = styled(motion.div)`
+const DateGroup = styled(motion.div)`
+  margin-bottom: 1rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const DateHeader = styled(motion.div)`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  gap: 0.75rem;
+  margin-bottom: ${props => props.isExpanded ? '1rem' : '0'};
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
   transition: all 0.2s ease;
+  user-select: none;
   
   &:hover {
-    background: #f1f5f9;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: #cbd5e0;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 `;
 
-const SlotTime = styled.span`
-  color: #475569;
-  font-weight: 500;
-  font-size: 0.9rem;
+const DateIcon = styled.div`
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 `;
 
-const BookButton = styled(motion.button)`
+const DateText = styled.div``;
+
+const DateDay = styled.div`
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+`;
+
+const DateInfo = styled.div`
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+`;
+
+const SlotsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+`;
+
+const SlotCard = styled(motion.div)`
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #059669, #10b981);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+  
+  &:hover {
+    border-color: #10b981;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+    transform: translateY(-2px);
+    
+    &:before {
+      transform: scaleX(1);
+    }
+  }
+`;
+
+const SlotTime = styled.div`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+`;
+
+const SlotPeriod = styled.div`
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+`;
+
+const QuickBookButton = styled(motion.div)`
   background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.25rem;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
   
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+  ${SlotCard}:hover & {
+    opacity: 1;
   }
+`;
+
+const SlotsBadge = styled.span`
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1e40af;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: auto;
+`;
+
+const ExpandIcon = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  color: #64748b;
+  transition: color 0.2s ease;
+  
+  ${DateHeader}:hover & {
+    color: #475569;
+  }
+`;
+
+const SlotsContainer = styled(motion.div)`
+  overflow: hidden;
 `;
 
 const EmptyState = styled.div`
@@ -259,6 +394,7 @@ const PatientDashboard = () => {
   const [myBookings, setMyBookings] = useState([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [expandedDates, setExpandedDates] = useState(new Set());
   const { user, logout } = useContext(AuthContext);
 
   const fetchData = async () => {
@@ -288,7 +424,7 @@ const PatientDashboard = () => {
   const handleBooking = async (slotId) => {
     try {
       await api.post('/book', { slotId });
-      setMessage(`Successfully booked slot: ${new Date(slotId).toLocaleString()}`);
+      setMessage(`Appointment booked successfully!`);
       fetchData(); // Refresh all data
       // Clear success message after 5 seconds
       setTimeout(() => setMessage(''), 5000);
@@ -299,8 +435,103 @@ const PatientDashboard = () => {
     }
   };
 
+  const toggleDateExpansion = (dateKey) => {
+    setExpandedDates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dateKey)) {
+        newSet.delete(dateKey);
+      } else {
+        newSet.add(dateKey);
+      }
+      return newSet;
+    });
+  };
+
+  // Group slots by date
+  const groupSlotsByDate = (slots) => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+
+    return slots.reduce((groups, slot) => {
+      const slotDate = new Date(slot.start_time);
+      const dateKey = slotDate.toISOString().split('T')[0];
+
+      if (!groups[dateKey]) {
+        groups[dateKey] = {
+          date: slotDate,
+          slots: []
+        };
+      }
+
+      groups[dateKey].slots.push(slot);
+      return groups;
+    }, {});
+  };
+
+  const formatTimeSlot = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getTimeOfDay = (date) => {
+    const hour = date.getHours();
+    if (hour < 12) return 'Morning';
+    if (hour < 17) return 'Afternoon';
+    return 'Evening';
+  };
+
+  const formatDateHeader = (date) => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    const isToday = date.toDateString() === today.toDateString();
+    const isTomorrow = date.toDateString() === tomorrow.toDateString();
+    const isCurrentYear = date.getFullYear() === today.getFullYear();
+
+    if (isToday) {
+      return {
+        day: 'Today',
+        info: date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          ...(isCurrentYear ? {} : { year: 'numeric' })
+        })
+      };
+    } else if (isTomorrow) {
+      return {
+        day: 'Tomorrow',
+        info: date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          ...(isCurrentYear ? {} : { year: 'numeric' })
+        })
+      };
+    } else {
+      return {
+        day: date.toLocaleDateString('en-US', { weekday: 'long' }),
+        info: date.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          ...(isCurrentYear ? {} : { year: 'numeric' })
+        })
+      };
+    }
+  };
+
+  const groupedSlots = groupSlotsByDate(slots);
+
   useEffect(() => {
     fetchData();
+
+    // Auto-expand today's date by default
+    const today = new Date().toISOString().split('T')[0];
+    setExpandedDates(new Set([today]));
   }, []);
 
   return (
@@ -416,7 +647,7 @@ const PatientDashboard = () => {
             >
               <Plus color="white" size={20} />
             </CardIcon>
-            <CardTitle>Available Slots (Next 7 Days)</CardTitle>
+            <CardTitle>Available Appointments</CardTitle>
           </CardHeader>
 
           {loading ? (
@@ -428,34 +659,95 @@ const PatientDashboard = () => {
             </LoadingSpinner>
           ) : (
             <SlotsList>
-              {slots.length > 0 ? (
-                slots.map(slot => (
-                  <SlotItem
-                    key={slot.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <SlotTime>
-                      {new Date(slot.start_time).toLocaleString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </SlotTime>
-                    <BookButton
-                      onClick={() => handleBooking(slot.id)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Plus size={16} />
-                      Book
-                    </BookButton>
-                  </SlotItem>
-                ))
+              {Object.keys(groupedSlots).length > 0 ? (
+                Object.entries(groupedSlots)
+                  .sort(([a], [b]) => new Date(a) - new Date(b))
+                  .map(([dateKey, { date, slots: dateSlots }], groupIndex) => {
+                    const { day, info } = formatDateHeader(date);
+                    const isExpanded = expandedDates.has(dateKey);
+                    const isToday = new Date().toDateString() === date.toDateString();
+
+                    return (
+                      <DateGroup
+                        key={dateKey}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: groupIndex * 0.1 }}
+                      >
+                        <DateHeader
+                          onClick={() => toggleDateExpansion(dateKey)}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          isExpanded={isExpanded}
+                        >
+                          <DateIcon>
+                            <Calendar color="white" size={16} />
+                          </DateIcon>
+                          <DateText>
+                            <DateDay>{day}</DateDay>
+                            <DateInfo>{info}</DateInfo>
+                          </DateText>
+                          <SlotsBadge>
+                            {dateSlots.length} slot{dateSlots.length !== 1 ? 's' : ''}
+                          </SlotsBadge>
+                          <ExpandIcon
+                            animate={{
+                              rotate: isExpanded ? 90 : 0
+                            }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronRight size={16} />
+                          </ExpandIcon>
+                        </DateHeader>
+
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <SlotsContainer
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                            >
+                              <SlotsGrid>
+                                {dateSlots.map((slot, slotIndex) => {
+                                  const slotDate = new Date(slot.start_time);
+                                  const timeString = formatTimeSlot(slotDate);
+                                  const period = getTimeOfDay(slotDate);
+
+                                  return (
+                                    <SlotCard
+                                      key={slot.id}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{
+                                        duration: 0.3,
+                                        delay: slotIndex * 0.05
+                                      }}
+                                      whileHover={{
+                                        scale: 1.05,
+                                        rotateY: 5
+                                      }}
+                                      onClick={() => handleBooking(slot.id)}
+                                    >
+                                      <SlotTime>{timeString}</SlotTime>
+                                      <SlotPeriod>{period}</SlotPeriod>
+                                      <QuickBookButton
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                      >
+                                        <Plus size={14} />
+                                        Book Now
+                                      </QuickBookButton>
+                                    </SlotCard>
+                                  );
+                                })}
+                              </SlotsGrid>
+                            </SlotsContainer>
+                          )}
+                        </AnimatePresence>
+                      </DateGroup>
+                    );
+                  })
               ) : (
                 <EmptyState>
                   No available slots in the next 7 days
